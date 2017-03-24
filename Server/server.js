@@ -88,27 +88,35 @@ var count = 0;
 // Creates a direct data stream from the user's microphone into the Speech-to-text API
 // RETURNS the transcribed text string when the user is done talking
 app.post('/testStream', function(req, res) {
- 
- count++;
- console.log('count:', count);
  record.start({
-   sampleRate: 44100,
-   threshold: 0,
-   verbose: true
+   sampleRate: 16000,
+   threshold: 0
+   // verbose: true
  })
  .pipe(Speech.liveStreamAudio((data) => {
    console.log(data);
+   if(Array.isArray(data.results) && data.results[0] !== undefined) {
+      Translater(data.results[0].transcript, 'es', (translate) =>{
+        io.emit('transcription', data, translate);
+        // console.log(data); 
+      })
+   }else if(typeof data.results === 'string'){
+    Translater(data.results, 'es', (translate) =>{
+        console.log(data);
+        io.emit('transcription', translate);
+      })
+   }
+   // Translator()
    // res.write(data.results);
 
    // let speech = data.results.length ? data.results[0].transcribe : '';
    // io.on('connection', (socket) => {
    // console.log('speech here:', speech);
    // if (data.results.length > 0) {
-     io.emit('transcription', data);
    // }
    // });
    if (data.endpointerType === 'ENDPOINTER_EVENT_UNSPECIFIED') {
-     console.log('transcribed data from teststream', data.results[0]);
+     // console.log('transcribed data from teststream', data.results[0]);
      res.status(201).end(data.results[0].transcript);
    }
 

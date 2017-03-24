@@ -1,12 +1,13 @@
 const Translate = require('@google-cloud/translate')({
 	projectId: 'isolineator-162122',
-	keyFilename: '../APIs/Isolineator-51a1a3f4914b.json'
+	keyFilename: './APIs/Isolineator-51a1a3f4914b.json'
 })
 
 
 exports.Translater = function(text, target, callback) {
 	Translate.translate(text, target).then((results) => {
-    console.log(results[0])
+    // console.log(results[0])
+    callback(results[0]);
   }).catch((error) => {
   		console.log(error);
   })

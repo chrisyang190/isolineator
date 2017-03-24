@@ -96,13 +96,24 @@ app.post('/testCreate', (req, res) => {
 // Creates a direct data stream from the user's microphone into the Speech-to-text API
 // RETURNS the transcribed text string when the user is done talking
 app.post('/testStream', function(req, res) {
-  
   record.start({
     sampleRate: 44100,
     threshold: 0,
     verbose: true
   })
   .pipe(Speech.liveStreamAudio((data) => {
+    
+   if(Array.isArray(data.results) && data.results[0] !== undefined) {
+      Translater(data.results[0].transcript, 'es', (translate) =>{
+        io.emit('transcription', data, translate);
+        // console.log(data); 
+      })
+   }else if(typeof data.results === 'string'){
+    Translater(data.results, 'es', (translate) =>{
+        console.log(data);
+        io.emit('transcription', translate);
+      })
+   }
 
     if (data.results.length > 0) {
       io.emit('transcription', data);

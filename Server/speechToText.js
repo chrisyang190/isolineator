@@ -14,7 +14,7 @@ const options = {
 const request = {
   config: {
     encoding: 'LINEAR16',
-    sampleRate: 44100
+    sampleRate: 16000
   },
   singleUtterance: false,
   interimResults: true, // maybe to false

@@ -76,8 +76,6 @@ angular.module('app')
 
     console.log('get recording', formData.get('recording'));
 
-    console.log('Form data:', formData);
-
     $http({
       method: 'POST',
       url: '/record', 

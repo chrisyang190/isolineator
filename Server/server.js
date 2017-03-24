@@ -54,9 +54,17 @@ app.post('/log', function(req, res) {
 });
 
 app.post('/record', upload.single('recording'), function(req, res) {
- console.log('post handled: request file', req.file);
- console.log('post handled: request body', req.body);
- res.status(201).end();
+
+  console.log('post handled: request file', req.file);
+
+  // Speech.streamFile(`./${req.file.path}`, (data)=>{
+  //   if (data.endpointerType === 'ENDPOINTER_EVENT_UNSPECIFIED') {
+  //     console.log('data.results', data.results);
+  //     console.log('data.results[0].transcript', data.results[0].transcript);
+  //     res.status(201).send(data.results[0].transcript);
+  //   }
+  // });
+  // // res.status(201).end();
 });
 
 app.post('/stopStream', function (req, res) {
@@ -84,47 +92,45 @@ app.post('/testCreate', (req, res) => {
  }));
 });
 
-var count = 0;
+
 // Creates a direct data stream from the user's microphone into the Speech-to-text API
 // RETURNS the transcribed text string when the user is done talking
 app.post('/testStream', function(req, res) {
- 
- count++;
- console.log('count:', count);
- record.start({
-   sampleRate: 44100,
-   threshold: 0,
-   verbose: true
- })
- .pipe(Speech.liveStreamAudio((data) => {
-   console.log(data);
-   // res.write(data.results);
+  
+  record.start({
+    sampleRate: 44100,
+    threshold: 0,
+    verbose: true
+  })
+  .pipe(Speech.liveStreamAudio((data) => {
 
-   // let speech = data.results.length ? data.results[0].transcribe : '';
-   // io.on('connection', (socket) => {
-   // console.log('speech here:', speech);
-   // if (data.results.length > 0) {
-     io.emit('transcription', data);
-   // }
-   // });
-   if (data.endpointerType === 'ENDPOINTER_EVENT_UNSPECIFIED') {
-     console.log('transcribed data from teststream', data.results[0]);
-     res.status(201).end(data.results[0].transcript);
-   }
+    if (data.results.length > 0) {
+      io.emit('transcription', data);
+    }
 
- }));
+    if (data.endpointerType === 'ENDPOINTER_EVENT_UNSPECIFIED') {
+      if (Array.isArray(data.results)) {
+        console.log('transcribed data from teststream (count = 0)', data.results[0].transcript);
+        res.status(201).end(data.results[0].transcript);
+      } else {
+        console.log('transcribed data from teststream (count > 0): ', data.results);
+        res.status(201).end(data.results[0].transcript);
+      }
+    }
+
+  }));
 });
 
 
 // Transcribes a local audio file that already exisits
 // RETURN the transcribed text string when done
 app.post('/testFile', function(req, res) {
- Speech.streamFile('./Server/audio/test.wav', (data)=>{
-   console.log(data.results);
-   if(data.endpointerType === 'ENDPOINTER_EVENT_UNSPECIFIED') {
-     res.status(201).send(data.results[0].transcript);
-   }
- });
+  Speech.streamFile('./Server/audio/test.wav',(data)=>{
+    console.log(data.results);
+    if(data.endpointerType === 'ENDPOINTER_EVENT_UNSPECIFIED') {
+      res.status(201).send(data.results[0].transcript);
+    }
+  });
 });
 
 

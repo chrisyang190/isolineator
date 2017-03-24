@@ -222,8 +222,14 @@ var RecorderController = function (element, service, service1, recorderUtils, $s
     // var socket = io.connect('http://127.0.0.1:5000');
     // var socket = new io.Socket();
     socket.on('transcription', function(data) {
-      console.log('transcription:', data);
-      $scope.text = data.results;
+      // console.log('transcription:', data);
+      if (Array.isArray(data.results) && data.results[0].transcript !== undefined) {
+        console.log('transcription data.results is array:', data);
+        $scope.text = data.results[0].transcript;
+      } else {
+        console.log('transcription data.results is NOT array:', data);
+        $scope.text = data.results;
+      }
     });
 
     service1.postStream(function(data) {
